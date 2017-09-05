@@ -81,9 +81,9 @@ router.post('/upload', upload.single('image'), function(req, res, next) {
       fs.unlink(req.file.path, function(){});
 
       if(req.file.mimetype == 'image/gif')
-        gm('public/uploads/' + filename).selectFrame(0).thumbnail('125x125').write('public/thumbnails/' + filename, function(err){console.log(err)});
+        gm('public/uploads/' + filename).selectFrame(0).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
       else
-        gm('public/uploads/' + filename).thumbnail('125x125').write('public/thumbnails/' + filename, function(err){console.log(err)});
+        gm('public/uploads/' + filename).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
 
       return gm('public/uploads/' + filename).sizeAsync();
     })
