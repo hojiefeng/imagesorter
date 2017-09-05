@@ -51,6 +51,33 @@ router.get('/upload', function(req, res, next) {
   res.render('imageupload', { title: 'Image Upload' });
 });
 
+var processimage = Promise.promisify(function(file, callback) {
+  var hashstream = fs.createReadStream(file.path).pipe(crypto.createHash('md5').setEncoding('hex'));
+  hashstream.on('finish', function () {
+    var hash = this.read();
+    var filename = hash + '.' + mime.extension(file.mimetype)
+    fs.renameAsync(file.path, 'public/uploads/' + filename)
+    .then(function(){
+      fs.unlink(file.path, function(){});
+
+      if(file.mimetype == 'image/gif')
+        gm('public/uploads/' + filename).selectFrame(0).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
+      else
+        gm('public/uploads/' + filename).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
+
+      return gm('public/uploads/' + filename).sizeAsync();
+    })
+    .then(function(size){
+      return {
+        width: size.width,
+        height: size.height,
+        hash: hash,
+        filename: filename
+      };
+    })
+    .asCallback(callback);
+  });
+});
 router.post('/upload', upload.single('image'), function(req, res, next) {
   if(!req.file){
     res.render('imageupload', {error: 'No image file uploaded!'});
@@ -61,58 +88,119 @@ router.post('/upload', upload.single('image'), function(req, res, next) {
     res.render('imageupload', {error: 'File is not an image or video. Type: ' + req.file.mimetype});
     return;
   }
-
+  var hash, obj
   //dedupe files using MD5
-  var hashstream = fs.createReadStream(req.file.path).pipe(crypto.createHash('md5').setEncoding('hex'));
-  hashstream.on('finish', function () {
-    var hash = this.read();
-    var filename;
-    images.findByHash(hash)
-    .then(function(test){
-      if(test)//if it already exists just ignore
-      {
-        res.render('imageupload', {duplicate: test._id});
-        throw 'Duplicate!'
-      }
-      filename = hash + '.' + mime.extension(req.file.mimetype)
-      return fs.renameAsync(req.file.path, 'public/uploads/' + filename);
-    })
-    .then(function(){
-      fs.unlink(req.file.path, function(){});
-
-      if(req.file.mimetype == 'image/gif')
-        gm('public/uploads/' + filename).selectFrame(0).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
-      else
-        gm('public/uploads/' + filename).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
-
-      return gm('public/uploads/' + filename).sizeAsync();
-    })
-    .then(function(size){
-      var image = {
-        character: req.body.character,
-        emotion: req.body.emotion,
-        text: req.body.text,
-        tags: req.body.tags,
-        comments: req.body.comments,
-        size: req.file.size,
-        mimetype: req.file.mimetype,
-        hash: hash,
-        width: size.width,
-        height: size.height
-      };
-      return images.add(image)
-    })
-    .then(function(image){
-      res.redirect('/images/' + image._id);
-    })
-    .catch(function(error){
-      console.log(error);
-      fs.unlink(req.file.path, function(){});
-      res.render('imageupload', {error: 'An error occured'});
-    });
+  processimage(req.file)
+  .then(function(processed){
+    hash = processed.hash;
+    filename = processed.filename;
+    obj = processed;
+    return images.findByHash(hash)
   })
+  .then(function(test){
+    console.log(test, hash);
+    if(test)//if it already exists just ignore
+    {
+      res.render('imageupload', {duplicate: test._id});
+      throw 'Duplicate!'
+    }
+    fs.unlink(req.file.path, function(){});
+    var image = {
+      character: req.body.character,
+      emotion: req.body.emotion,
+      text: req.body.text,
+      tags: req.body.tags,
+      comments: req.body.comments,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+      hash: obj.hash,
+      width: obj.width,
+      height: obj.height
+    };
+    return images.add(image)
+  })
+  .then(function(image){
+    res.redirect('/images/' + image._id);
+  })
+  .catch(function(error){
+    console.log(error);
+    fs.unlink(req.file.path, function(){});
+    if(error != 'Duplicate!')res.render('imageupload', {error: 'An error occured'});
+  });
 });
 
+
+router.get('/batchupload', function(req, res, next) {
+  res.render('imageuploadmultiple', { title: 'Image Batch Upload' });
+});
+
+router.post('/batchupload', upload.any(), function(req, res, next) {
+  if(!req.files){
+    res.render('imageuploadmultiple', {error: 'No image file uploaded!'});
+    return;
+  }
+  var numfiles = req.files.length;
+
+  if(numfiles != req.body.commentsmultiple.length ||
+    numfiles != req.body.tagsmultiple.length ||
+    numfiles != req.body.emotionmultiple.length ||
+    numfiles != req.body.charactermultiple.length ||
+    numfiles != req.body.textmultiple.length)
+  {
+    res.render('imageuploadmultiple', { error: "Some fields dont tally! Different number of different input fields."})
+    return;
+  }
+
+  var inserts = []
+  for(var i = 0;i<numfiles;i++)
+  {
+    if(!req.files[i].mimetype.startsWith('image') && !req.files[i].mimetype.startsWith('video')){
+      fs.unlink(req.file.path, function(){});
+      continue;
+    }
+    (function(curindex){
+      var hash;
+      var filename;
+      var obj;
+      var pi = processimage(req.files[i])
+      .then(function(processed){
+        hash = processed.hash;
+        filename = processed.filename;
+        obj = processed;
+        return images.findByHash(hash)
+      })
+      .then(function(test){
+        console.log(test, hash);
+        if(test)//if it already exists just ignore
+        {
+          return Promise.resolve();
+        }
+        var image = {
+          character: req.body.character,
+          emotion: req.body.emotion,
+          text: req.body.text,
+          tags: req.body.tags,
+          comments: req.body.comments,
+          size: req.files[curindex].size,
+          mimetype: req.files[curindex].mimetype,
+          hash: obj.hash,
+          width: obj.width,
+          height: obj.height
+        };
+        return images.add(image)
+      });
+      inserts.push(pi);
+    })(i);
+  }
+  Promise.all(inserts)
+  .then(function(){
+    res.redirect('/');
+  })
+  .catch(function(err){
+    console.log(err);
+    res.render('imageuploadmultiple', { error: "Some error occured!"});
+  })
+});
 
 router.get('/:id', function(req, res, next) {
   images.get(req.params.id)

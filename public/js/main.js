@@ -19,8 +19,12 @@ $(document).ready(function(){
             }
         });
     })
-    
 
+
+
+    //button behaviour:
+    //unclicked: shows edit
+    //clicked: changes to textboxes and becomes 'submit changes' button
     $('#editimage').data('clicked', false);
     $('#editimage').on('click', function(){
         if($(this).data('clicked') == false)
@@ -37,6 +41,7 @@ $(document).ready(function(){
         {
             var edited = {};
             var id = $(this).attr('data-id');
+            //quick haxx using the id of the element as the key value
             $('.editable input').each(function(){
                 var value = $(this).val();
                 var key = $(this).parent().attr('id');
@@ -56,5 +61,29 @@ $(document).ready(function(){
                 }
             });
         }
+    });
+
+
+    $('#nextstep').on('click', function(){
+        var files = $("#imagemultiple")[0].files;
+        var source   = $("#imageedit-template").html();
+        var template = Handlebars.compile(source);
+        var context = {tags: "My New Post", character: "This is my first post!"};
+        var html    = template(context);
+        $('#multiimageedit').html('');
+        for(var i = 0;i<files.length;i++)
+        {
+          $('#multiimageedit').append(
+            template({
+              character: $('#character').val(),
+              emotion: $('#emotion').val(),
+              tags: $('#tags').val(),
+              text: $('#text').val(),
+              comments: $('#comments').val(),
+              imageurl: window.URL.createObjectURL(files[i])
+            })
+          );
+        }
+        $('#multiimageedit').append('<button name="submit" id="submit" value="Submit" type="submit" class="btn btn-info">Submit</button><br/>');
     });
 })
