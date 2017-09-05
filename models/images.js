@@ -1,7 +1,7 @@
 
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
-mongoose.connect('mongodb://localhost/images');
+mongoose.connect('mongodb://localhost/imagesorter');
 var imageSchema = mongoose.Schema({
     file: String,
     mimetype: String,
