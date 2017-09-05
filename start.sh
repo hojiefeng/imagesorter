@@ -1,0 +1,2 @@
+DEBUG=images:* npm start
+

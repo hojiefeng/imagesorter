@@ -1,0 +1,51 @@
+
+<h1>{{title}}</h1>
+
+{{#if duplicate}}
+  <div class="alert alert-danger">This image has already been uploaded at <a href="/images/{{duplicate}}">/images/{{duplicate}}</a></div>
+{{/if}}
+
+{{#if error}}
+  <div class="alert alert-danger">{{error}}</a></div>
+{{/if}}
+<form method="post" action="upload" enctype="multipart/form-data" class="form-horizontal">
+  <div class="form-group">
+    <label for="character" class="control-label col-sm-1">Character</label>
+    <div class="col-sm-11">
+      <input type="text" name="character" class="form-control" value="{{character}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="emotion" class="control-label col-sm-1">Emotion</label>
+    <div class="col-sm-11">
+      <input type="text" name="emotion" class="form-control" value="{{emotion}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="emotion" class="control-label col-sm-1">Text</label>
+    <div class="col-sm-11">
+      <input type="text" name="text" class="form-control" value="{{text}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="tags" class="control-label col-sm-1">Tags</label>
+    <div class="col-sm-11">
+      <input type="text" name="tags" class="form-control" value="{{tags}}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="comments" class="control-label col-sm-1">Comments</label>
+    <div class="col-sm-11">
+      <textarea name="comments" id="comments" class="form-control" value="{{comments}}"></textarea>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="image" class="control-label col-sm-1">Image File</label>
+    <div class="col-sm-11">
+      <input type="file" name="image" id="image" class="form-control"><br/>
+    </div>
+  </div>
+  <input type="submit" name="submit" value="submit" class="btn btn-info"><br/>
+  <p>Preview:</p>
+  <img id="imagepreview" />
+</form>
