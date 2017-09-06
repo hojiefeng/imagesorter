@@ -176,11 +176,11 @@ router.post('/batchupload', upload.any(), function(req, res, next) {
           return Promise.resolve();
         }
         var image = {
-          character: req.body.character,
-          emotion: req.body.emotion,
-          text: req.body.text,
-          tags: req.body.tags,
-          comments: req.body.comments,
+          character: req.body.charactermultiple[curindex],
+          emotion: req.body.emotionmultiple[curindex],
+          text: req.body.textmultiple[curindex],
+          tags: req.body.tagsmultiple[curindex],
+          comments: req.body.commentsmultiple[curindex],
           size: req.files[curindex].size,
           mimetype: req.files[curindex].mimetype,
           hash: obj.hash,
