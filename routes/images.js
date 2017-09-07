@@ -10,6 +10,7 @@ var crypto = require('crypto')
 var gm = require('gm').subClass({imageMagick: true});
 Promise.promisifyAll(gm.prototype);
 var _ = require('lodash');
+var request = require('request');
 
 /* GET images listing. */
 router.get('/', function(req, res, next) {
@@ -201,6 +202,89 @@ router.post('/batchupload', upload.any(), function(req, res, next) {
     res.render('imageuploadmultiple', { error: "Some error occured!"});
   })
 });
+
+
+
+
+router.get('/uploadurl', function(req, res, next) {
+  res.render('imageuploadurl', { title: 'Image URL Upload' });
+});
+
+
+
+router.post('/uploadurl', function(req, res, next) {
+  console.log(req.body);
+  if(!req.body.imageurl){
+    res.render('imageupload', {error: 'No image file uploaded!'});
+    return;
+  }
+
+  var original = 'uploads/' + crypto.randomBytes(16).toString('hex');
+  var dlstream = request(req.body.imageurl).pipe(fs.createWriteStream(original));
+  var mimetype = mime.lookup(req.body.imageurl);
+  dlstream.on('finish', function(){
+
+    if(!mimetype.startsWith('image') && !mimetype.startsWith('video')){
+      fs.unlink(original, function(){});
+      res.render('imageupload', {error: 'File is not an image or video. Type: ' + mimetype});
+      return;
+    }
+    var hash, obj, filesize;
+    //dedupe files using MD5
+    fs.statAsync(original)
+    .then(function(stat){
+      filesize = stat.size;
+      return processimage({path: original, mimetype: mimetype});
+    })
+    .then(function(processed){
+      hash = processed.hash;
+      filename = processed.filename;
+      obj = processed;
+      return images.findByHash(hash)
+    })
+    .then(function(test){
+      console.log(test, hash);
+      if(test)//if it already exists just ignore
+      {
+        res.render('imageupload', {duplicate: test._id});
+        throw 'Duplicate!'
+      }
+      fs.unlink(original, function(){});
+
+      var image = {
+        character: req.body.character,
+        emotion: req.body.emotion,
+        text: req.body.text,
+        tags: req.body.tags,
+        comments: req.body.comments,
+        size: filesize,
+        mimetype: mimetype,
+        hash: obj.hash,
+        width: obj.width,
+        height: obj.height
+      };
+      return images.add(image)
+    })
+    .then(function(image){
+      res.redirect('/images/' + image._id);
+    })
+    .catch(function(error){
+      console.log(error);
+      fs.unlink(original, function(){});
+      if(error != 'Duplicate!')res.render('imageupload', {error: 'An error occured'});
+    });
+
+  });
+
+
+});
+router.get('/:id', function(req, res, next) {
+  images.get(req.params.id)
+  .then(function(image){
+    res.render('image', image);
+  })
+});
+
 
 router.get('/:id', function(req, res, next) {
   images.get(req.params.id)
