@@ -42,7 +42,7 @@ router.get('/', function(req, res, next) {
       images[i].number = (page-1)*perpage + i + 1;
     }
 
-    res.render('index', { title: 'Images' , images: images, pages: pages, query: query, hasprev: pages[0] == page-1, hasnext: pages[pages.length - 1] == page+1});
+    res.render('index', { title: 'Images' , count: count, images: images, pages: pages, query: query, hasprev: pages[0] == page-1, hasnext: pages[pages.length - 1] == page+1});
   })
 });
 
