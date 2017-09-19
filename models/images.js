@@ -16,7 +16,7 @@ var imageSchema = mongoose.Schema({
     created: { type: Date, default: Date.now },
 });
 
-imageSchema.index({ character: 'text', emotion: 'text', text: 'text', tags: 'text', comment: 'text' });
+imageSchema.index({ character: 'text', emotion: 'text', text: 'text', tags: 'text', comments: 'text' });
 
 var Image = mongoose.model('images', imageSchema);
 var images = {};
@@ -60,5 +60,11 @@ images.getRange = function(from, items, query) {
     return Image.find({$text: {$search: query}}).skip(from).limit(items).exec();
   else
     return Image.find().sort({created: -1}).skip(from).limit(items).exec();
+}
+
+images.getCount = function(query){
+  if(query)
+    return Image.count({$text: {$search: query}}).exec();
+  else return this.count();
 }
 module.exports = images

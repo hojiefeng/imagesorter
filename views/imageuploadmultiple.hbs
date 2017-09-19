@@ -18,7 +18,7 @@
   <div class="form-group">
     <label for="emotion" class="control-label col-sm-1">Emotion</label>
     <div class="col-sm-11">
-      <input type="text" name="emotion" class="form-control" id="emotion" value="{{emotion}}">
+      <input type="text" name="emotion" list="emotion-datalist" class="form-control" id="emotion" value="{{emotion}}">
     </div>
   </div>
   <div class="form-group">
@@ -52,42 +52,43 @@
   </div>
   <img id="imagepreview" />
 </form>
-
+{{{{raw}}}}
 <script id="imageedit-template" type="text/x-handlebars-template">
   <div class="row">
-    <div class="col-sm-6"><img style="max-width: 100%" src="\{{imageurl}}"></div>
+    <div class="col-sm-6"><img style="max-width: 100%" src="{{imageurl}}"></div>
     <div class="col-sm-6">
       <div class="form-group">
         <label for="character" class="control-label col-sm-1">Character</label>
         <div class="col-sm-11">
-          <input type="text" name="charactermultiple" class="form-control" id="charactermultiple" value="\{{character}}">
+          <input type="text" name="charactermultiple" class="form-control" id="charactermultiple" value="{{character}}">
         </div>
       </div>
       <div class="form-group">
         <label for="emotion" class="control-label col-sm-1">Emotion</label>
         <div class="col-sm-11">
-          <input type="text" name="emotionmultiple" class="form-control" id="emotionmultiple" value="\{{emotion}}">
+          <input type="text" name="emotionmultiple" class="form-control" id="emotionmultiple" value="{{emotion}}">
         </div>
       </div>
       <div class="form-group">
         <label for="emotion" class="control-label col-sm-1">Text</label>
         <div class="col-sm-11">
-          <input type="text" name="textmultiple" class="form-control" id="textmultiple" value="\{{text}}">
+          <input type="text" name="textmultiple" class="form-control" id="textmultiple" value="{{text}}">
         </div>
       </div>
       <div class="form-group">
         <label for="tags" class="control-label col-sm-1">Tags</label>
         <div class="col-sm-11">
-          <input type="text" name="tagsmultiple" class="form-control" id="tagsmultiple" value="\{{tags}}">
+          <input type="text" name="tagsmultiple" class="form-control" id="tagsmultiple" value="{{tags}}">
         </div>
       </div>
       <div class="form-group">
         <label for="comments" class="control-label col-sm-1">Comments</label>
         <div class="col-sm-11">
-          <textarea name="commentsmultiple" id="commentsmultiple" class="form-control" id="commentsmultiple">\{{comments}}</textarea>
+          <textarea name="commentsmultiple" id="commentsmultiple" class="form-control" id="commentsmultiple">{{comments}}</textarea>
         </div>
       </div>
     </div>
   </div>
   <hr/>
 </script>
+{{{{/raw}}}}

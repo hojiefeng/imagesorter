@@ -20,10 +20,11 @@ router.get('/', function(req, res, next) {
   var perpage = parseInt(req.query.perpage || 10);
   var page = parseInt(req.query.page || 1);
 
-  Promise.join(images.getRange((page-1) * perpage, perpage,query), images.count(),
+  Promise.join(images.getRange((page-1) * perpage, perpage,query), images.getCount(query),
   function(images, count){
     var size = images.length || 0;
     var count = count || 0;
+    var totalpages = Math.floor((count + 1)/perpage)
     var pages = [];
 
     if(size==0 && count!=0 && !query)
@@ -33,16 +34,48 @@ router.get('/', function(req, res, next) {
     }
 
     //TODO: even if last page is full its likely that there may not be a next page
-    if(page > 1) pages.push({number: page-1});
-    pages.push({number: page, active: 1});
-    if(size == perpage) pages.push({number: page+1}); //has it reached last page?
+    if(page-5 < 1) {
+      for(var i = 1;i<=11 && i<=totalpages;i++)
+      {
+        pages.push({number: i});
+      }
+    }
+    else if(page+5 > totalpages) {
+      for(var i = totalpages; i > totalpages - 11 && i > 0;i--)
+      {
+        pages.push({number: i});
+      }
+      pages.reverse();
+    }
+    else {
+      for(var i = page - 5;i<page;i++)
+      {
+        pages.push({number: i});
+      }
+      pages.push({number: page})
+      for(var i = page + 1;i<=page+5;i++)
+      {
+        pages.push({number: i});
+      }
+    }
+    for(i in pages){
+      if(pages[i].number == page){pages[i].active = true;}
+    }
 
     for(var i = 0;i<size;i++)
     {
       images[i].number = (page-1)*perpage + i + 1;
     }
 
-    res.render('index', { title: 'Images' , count: count, images: images, pages: pages, query: query, hasprev: pages[0] == page-1, hasnext: pages[pages.length - 1] == page+1});
+    res.render('index', { title: 'Images' ,
+                          count: count,
+                          images: images,
+                          pages: pages,
+                          totalpages: totalpages,
+                          query: query,
+                          hasprev: pages[0] == page-1 ? 1 : undefined,
+                          hasnext: pages[pages.length - 1] == page+1 ? 1 : undefined,
+              });
   })
 });
 

@@ -20,9 +20,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 
-hbs.registerHelper('extension', function(a) {
-  return require('mime-types').extension(a);
-});
+hbs.registerHelper('extension', require('./helpers/extension'));
+hbs.registerHelper('raw', require('./helpers/raw'));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
