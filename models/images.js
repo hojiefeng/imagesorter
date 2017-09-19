@@ -57,7 +57,7 @@ images.count = function(){
 //sorts by time
 images.getRange = function(from, items, query) {
   if(query)
-    return Image.find({$text: {$search: query}}).skip(from).limit(items).exec();
+    return Image.find({$text: {$search: query}}, { score: { $meta: "textScore" } }).sort( { score: { $meta: "textScore" } } ).skip(from).limit(items).exec();
   else
     return Image.find().sort({created: -1}).skip(from).limit(items).exec();
 }
