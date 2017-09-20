@@ -116,6 +116,15 @@ router.get('/download', function(req, res, next) {
   })
 })
 
+router.get('/random', function(req, res, next) {
+  images.getRandom(req.query.query)
+  .then(function(image){
+    if(image.length)
+      res.redirect('/images/' + image[0]._id);
+    else 
+      res.redirect('/images')
+  })
+});
 router.get('/upload', function(req, res, next) {
   res.render('imageupload', { title: 'Image Upload' });
 });

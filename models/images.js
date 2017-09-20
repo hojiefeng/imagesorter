@@ -66,4 +66,13 @@ images.getCount = function(query){
     return Image.count({$text: {$search: query}}).exec();
   else return this.count();
 }
+
+
+images.getRandom = function(query){
+  if(query)
+    return Image.aggregate( [{$match: { $text: {$search: query}}}, { $sample: { size: 1 } }]).exec()
+  else return Image.aggregate( { $sample: { size: 1 } }).exec()
+}
+
+
 module.exports = images
