@@ -22,6 +22,7 @@ app.set('view engine', 'hbs');
 
 hbs.registerHelper('extension', require('./helpers/extension'));
 hbs.registerHelper('raw', require('./helpers/raw'));
+hbs.registerHelper('size', require('./helpers/size'));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

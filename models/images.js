@@ -1,19 +1,18 @@
 
 var mongoose = require('./mongodb');
 var imageSchema = mongoose.Schema({
-    file: String,
     mimetype: String,
     size: Number,
     width: Number,
     height: Number,
-    hash: String,
+    hash: { type: String, index: true },
     character: String,
     emotion: String,
     text: String,
     tags: String,
     comments: String,
-    udpated: { type: Date, default: Date.now },
-    created: { type: Date, default: Date.now },
+    updated: { type: Date, default: Date.now, index: true },
+    created: { type: Date, default: Date.now, index: true },
 });
 
 imageSchema.index({ character: 'text', emotion: 'text', text: 'text', tags: 'text', comments: 'text' });

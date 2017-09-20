@@ -59,7 +59,14 @@
     {{#each images}}
       <tr>
         <td>{{number}}</td>
-        <td><a href="/images/{{_id}}"><img src="/thumbnails/{{hash}}.jpeg" data-bigsrc="/uploads/{{hash}}.{{extension mimetype}}"/></a></td>
+        <td>
+          <figure>
+            <a href="/images/{{_id}}">
+              <img src="/thumbnails/{{hash}}.jpeg" class="img-thumbnail mx-auto d-block" data-bigsrc="/uploads/{{hash}}.{{extension mimetype}}"/>
+              <figcaption>{{width}}x{{height}}px, {{size size}}</figcaption>
+            </a>
+          </figure>
+        </td>
         <td>{{character}}</td>
         <td>{{emotion}}</td>
         <td>{{text}}</td>
