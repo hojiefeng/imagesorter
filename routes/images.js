@@ -13,6 +13,7 @@ var _ = require('lodash');
 var request = require('request');
 var archiver = require('archiver');
 var sanitize = require("sanitize-filename");
+var fileType = require('file-type');
 
 /* GET images listing. */
 router.get('/', function(req, res, next) {
@@ -26,7 +27,7 @@ router.get('/', function(req, res, next) {
   function(images, count){
     var size = images.length || 0;
     var count = count || 0;
-    var totalpages = Math.floor((count + 1)/perpage)
+    var totalpages = Math.floor((count + 1)/perpage) + 1
     var pages = [];
 
     if(size==0 && count!=0 && !query)
@@ -121,13 +122,24 @@ router.get('/random', function(req, res, next) {
   .then(function(image){
     if(image.length)
       res.redirect('/images/' + image[0]._id);
-    else 
+    else
       res.redirect('/images')
   })
 });
 router.get('/upload', function(req, res, next) {
   res.render('imageupload', { title: 'Image Upload' });
 });
+
+function getMime(filename) {
+  return new Promise(function(resolve, reject){
+    stream = fs.createReadStream(filename);
+    stream.once('data', function(chunk){
+      resolve(fileType(chunk));
+    })
+    stream.on('error', reject);
+    stream.resume();
+  })
+}
 
 var processimage = Promise.promisify(function(file, callback) {
   var hashstream = fs.createReadStream(file.path).pipe(crypto.createHash('md5').setEncoding('hex'));
@@ -139,9 +151,9 @@ var processimage = Promise.promisify(function(file, callback) {
       fs.unlink(file.path, function(){});
 
       if(file.mimetype == 'image/gif')
-        gm('public/uploads/' + filename).selectFrame(0).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
+        gm('public/uploads/' + filename).selectFrame(0).fill('white').thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
       else
-        gm('public/uploads/' + filename).thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
+        gm('public/uploads/' + filename).fill('white').thumbnail('125x125').write('public/thumbnails/' + hash + '.jpeg', function(err){console.log(err)});
 
       return gm('public/uploads/' + filename).sizeAsync();
     })

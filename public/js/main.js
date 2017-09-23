@@ -86,4 +86,13 @@ $(document).ready(function(){
         }
         $('#multiimageedit').append('<button name="submit" id="submit" value="Submit" type="submit" class="btn btn-info">Submit</button><br/>');
     });
+
+
+    $('.img-thumbnail').on('mouseover', function(){
+      $('#image-preview').attr('src', $(this).attr('data-bigsrc'))
+      $('#image-preview').show()
+    })
+    $('.img-thumbnail').on('mouseout', function(){
+      $('#image-preview').hide()
+    })
 })
