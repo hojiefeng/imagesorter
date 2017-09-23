@@ -34,6 +34,7 @@ $(document).ready(function(){
                var id = $(this).attr('id');
                $(this).html('<input type="text" name="' + id + '" class="form-control" value="' + text + '">');
             })
+            $('#tags input').attr("value", $('#tags').attr('data-tags'));
             $(this).text('Save Changes');
             $('#editimage').data('clicked', true);
         }
