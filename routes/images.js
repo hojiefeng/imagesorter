@@ -121,7 +121,7 @@ router.get('/random', function(req, res, next) {
   images.getRandom(req.query.query)
   .then(function(image){
     if(image.length)
-      res.redirect('/images/' + image[0]._id);
+      res.redirect('/images/' + image[0]._id + '?random=' + (req.query.query || ""));
     else
       res.redirect('/images')
   })
@@ -370,6 +370,7 @@ router.post('/uploadurl', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   images.get(req.params.id)
   .then(function(image){
+    image.random = req.query.random
     res.render('image', image);
   })
 });
