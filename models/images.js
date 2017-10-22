@@ -20,20 +20,7 @@ imageSchema.index({ character: 'text', emotion: 'text', text: 'text', tags: 'tex
 var Image = mongoose.model('images', imageSchema);
 var images = {};
 _ = require('lodash');
-/*Image.find({}).lean().exec(function(err, images){
-  var size = images.length;
-  for(var i = 0;i<size;i++)
-  {
-    var dupimage = images[i];
-    dupimage = _.omit(dupimage, '_id');
-    var newimage = new Image(dupimage);
 
-    newimage.save();
-  }
-
-});*/
-
-   //Image.remove({ "character" : { "$exists" : false } }).exec();
 images.add = function(image) {
   var newimages = new Image(image);
   return newimages.save()
@@ -53,6 +40,7 @@ images.update = function(id, updatedinfo){
 images.count = function(){
   return Image.count({}).exec();
 }
+
 //sorts by time
 images.getRange = function(from, items, query) {
   if(query)
